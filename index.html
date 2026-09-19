@@ -1011,10 +1011,14 @@ function pfLog(type, promptId, meta) {
 function flushPfLog() {
   if (!API_ON || !PF_LOGQ.length) return;
   const body = JSON.stringify({ vid: VID, sid: SID, events: PF_LOGQ.splice(0) });
+  // fetch keepalive 优先：实测跨域 sendBeacon + JSON Blob 会被静默丢弃
   try {
-    if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/prompts/log', new Blob([body], { type: 'application/json' }));
-    else fetch(API_BASE + '/api/prompts/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
-  } catch (e) {}
+    fetch(API_BASE + '/api/prompts/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {
+      try { if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/prompts/log', new Blob([body], { type: 'application/json' })); } catch (e) {}
+    });
+  } catch (e) {
+    try { if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/prompts/log', new Blob([body], { type: 'application/json' })); } catch (e2) {}
+  }
 }
 setInterval(flushPfLog, 10000);
 addEventListener('pagehide', flushPfLog);
@@ -1035,9 +1039,12 @@ function collectSend(events) {
     events
   });
   try {
-    if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/collect', new Blob([body], { type: 'application/json' }));
-    else fetch(API_BASE + '/api/collect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
-  } catch (e) {}
+    fetch(API_BASE + '/api/collect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {
+      try { if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/collect', new Blob([body], { type: 'application/json' })); } catch (e) {}
+    });
+  } catch (e) {
+    try { if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/collect', new Blob([body], { type: 'application/json' })); } catch (e2) {}
+  }
 }
 function reportDwell() {
   if (dwellSent || !API_ON) return;
@@ -1609,6 +1616,21 @@ function handleDeepLink() {
       API_ON = true;
       PROMPTS = list;
       render();
+      // 计数校准：列表有 60s 缓存，可能不含我最新的点赞。
+      // like 接口幂等（已赞则原样返回权威计数），用它把我赞过的卡片计数拉齐。
+      if (state.liked.size) {
+        await Promise.all([...state.liked].map(id => {
+          const p = PROMPTS.find(x => x.id === id);
+          if (!p) return Promise.resolve();
+          return fetch(API_BASE + '/api/prompts/like', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, vid: VID, liked: true })
+          }).then(r => r.ok ? r.json() : null)
+            .then(j => { if (j && j.ok && typeof j.likes === 'number') p.likes = j.likes; })
+            .catch(() => {});
+        }));
+        render();
+      }
     }
   } catch (e) { /* 离线/预览：保留内置兜底数据，不上报 */ }
   if (API_ON) {
