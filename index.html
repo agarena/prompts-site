@@ -437,6 +437,60 @@ a { color: inherit; }
 .hp { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .btn-submit:disabled { opacity: 0.6; transform: none; }
 
+/* ============ 提示词全文弹窗 ============ */
+.pf-modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(28, 20, 16, 0.5);
+  z-index: 80; opacity: 0; pointer-events: none;
+  transition: opacity 0.35s var(--ease-out);
+}
+.pf-modal-backdrop.show { opacity: 1; pointer-events: auto; }
+.pf-modal {
+  position: fixed; inset: 0; z-index: 81;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s var(--ease-out);
+}
+.pf-modal.show { opacity: 1; pointer-events: auto; }
+.pf-modal-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 780px; width: 100%; max-height: 86vh;
+  display: flex; flex-direction: column;
+  transform: translateY(16px) scale(0.985);
+  transition: transform 0.4s var(--ease-out);
+}
+.pf-modal.show .pf-modal-box { transform: none; }
+.pf-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 24px 28px 0; }
+.pf-modal-no { font-family: var(--font-display); font-style: italic; font-size: 0.8rem; letter-spacing: 0.08em; color: var(--ink-3); }
+.pf-modal-title { font-family: var(--font-display); font-size: 1.45rem; font-weight: 600; margin-top: 4px; line-height: 1.35; }
+.pf-modal-time { font-size: 0.78rem; color: var(--ink-3); margin-top: 6px; }
+.pf-modal-close {
+  width: 38px; height: 38px; flex: none;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  background: var(--surface); color: var(--ink-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.2s var(--ease-out);
+}
+.pf-modal-close:hover { border-color: var(--ink-3); color: var(--ink); transform: rotate(90deg); }
+.pf-modal-close svg { width: 15px; height: 15px; }
+.pf-modal-body { padding: 18px 28px 6px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+.pf-modal-content {
+  color: var(--ink-2); font-size: 0.92rem; line-height: 1.8;
+  white-space: pre-line;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.pf-modal-foot {
+  padding: 14px 28px 22px; border-top: 1px solid var(--line); margin-top: 14px;
+  display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+
 /* ============ Empty state ============ */
 .empty {
   display: none;
@@ -993,7 +1047,7 @@ const getAllTags = () => [...new Set(PROMPTS.flatMap(p => p.tags))];
 
 /* ================= State ================= */
 const state = {
-  q: '', sort: 'desc', tags: new Set(), expanded: new Set(),
+  q: '', sort: 'desc', tags: new Set(),
   liked: loadLiked()
 };
 function loadLiked() {
@@ -1162,7 +1216,6 @@ function platformHTML(p) {
 
 function cardHTML(p, i) {
   const liked = state.liked.has(p.id);
-  const open = state.expanded.has(p.id);
   return `
   <article class="card" data-id="${esc(p.id)}" style="--i:${i}">
     <div class="card-top">
@@ -1173,9 +1226,9 @@ function cardHTML(p, i) {
     <div class="card-scene"><span class="scene-label">使用场景</span>${hl(p.scene)}</div>
     ${p.img ? '<img class="card-img" src="' + esc(p.img) + '" alt="配图">' : ''}
     <div class="card-tags">${p.tags.map(t => `<button class="tag" data-action="tag" data-tag="${esc(t)}">${hl(t)}</button>`).join('')}</div>
-    <p class="card-content ${open ? 'open' : ''}">${hl(p.content)}</p>
-    ${p.example ? '<div class="card-example ' + (open ? 'open' : '') + '"><span class="ex-label">使用示例</span>' + hl(p.example) + '</div>' : ''}
-    <button class="btn-expand" data-action="expand">${open ? '收起' : '展开全文'}</button>
+    <p class="card-content">${hl(p.content)}</p>
+    ${p.example ? '<div class="card-example"><span class="ex-label">使用示例</span>' + hl(p.example) + '</div>' : ''}
+    <button class="btn-expand" data-action="expand">查看全文</button>
     <div class="card-foot">
       <span class="author">
         <span class="avatar" style="--av:${hueOf(p.author)}" title="${esc(p.author)}">${esc(p.author[0])}</span>
@@ -1258,34 +1311,9 @@ grid.addEventListener('click', async e => {
     }
   }
 
-  if (action === 'like') {
-    const nowLiked = !state.liked.has(p.id);
-    if (nowLiked) state.liked.add(p.id); else state.liked.delete(p.id);
-    saveLiked();
-    if (SERVER_MODE) {
-      // 乐观更新，服务端返回权威计数后校正（点赞事件由服务端记 pf_logs）
-      p.likes = Math.max(0, p.likes + (nowLiked ? 1 : -1));
-      render();
-      fetch(API_BASE + '/api/prompts/like', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: p.id, vid: VID, liked: nowLiked })
-      }).then(r => r.ok ? r.json() : null)
-        .then(j => { if (j && j.ok && typeof j.likes === 'number' && j.likes !== p.likes) { p.likes = j.likes; render(); } })
-        .catch(() => {});
-    } else {
-      render();
-    }
-  }
+  if (action === 'like') doLike(p);
 
-  if (action === 'expand') {
-    const willOpen = !state.expanded.has(p.id);
-    if (willOpen) state.expanded.add(p.id); else state.expanded.delete(p.id);
-    card.querySelector('.card-content').classList.toggle('open', willOpen);
-    const ex = card.querySelector('.card-example');
-    if (ex) ex.classList.toggle('open', willOpen);
-    btn.textContent = willOpen ? '收起' : '展开全文';
-    pfLog('expand', p.id, { open: willOpen });
-  }
+  if (action === 'expand') openPromptModal(p);
 
   if (action === 'feedback') openDrawer(fbDrawer, () => { fbPromptSel.value = p.id; });
 
@@ -1302,19 +1330,115 @@ grid.addEventListener('click', async e => {
     else toast('复制失败，请手动复制', true);
   }
 
-  if (action === 'share') {
-    const shareUrl = location.origin + location.pathname + '?id=' + encodeURIComponent(p.id);
-    if (navigator.share) {
-      navigator.share({ title: '《' + p.title + '》— 提示词卡片', text: p.scene, url: shareUrl })
-        .then(() => pfLog('share', p.id, { via: 'share' }))
-        .catch(() => {});
-    } else {
-      const ok = await copyText(shareUrl);
-      if (ok) { toast('分享链接已复制，发给朋友即可直达这张卡片'); pfLog('share', p.id, { via: 'copy' }); }
-      else toast('复制失败，请手动复制', true);
-    }
-  }
+  if (action === 'share') shareById(p);
 });
+
+/* ===== 点赞 / 分享共用逻辑（卡片与弹窗共用）===== */
+function doLike(p) {
+  const nowLiked = !state.liked.has(p.id);
+  if (nowLiked) state.liked.add(p.id); else state.liked.delete(p.id);
+  saveLiked();
+  if (SERVER_MODE) {
+    // 乐观更新，服务端返回权威计数后校正（点赞事件由服务端记 pf_logs）
+    p.likes = Math.max(0, p.likes + (nowLiked ? 1 : -1));
+    render();
+    fetch(API_BASE + '/api/prompts/like', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: p.id, vid: VID, liked: nowLiked })
+    }).then(r => r.ok ? r.json() : null)
+      .then(j => { if (j && j.ok && typeof j.likes === 'number' && j.likes !== p.likes) { p.likes = j.likes; render(); syncModalLike(p); } })
+      .catch(() => {});
+  } else {
+    render();
+  }
+}
+async function shareById(p) {
+  const shareUrl = location.origin + location.pathname + '?id=' + encodeURIComponent(p.id);
+  const ok = await copyText(shareUrl);
+  if (ok) { toast('分享链接已复制，发给朋友即可直达这张卡片'); pfLog('share', p.id, { via: 'copy' }); }
+  else toast('复制失败，请手动复制', true);
+}
+
+/* ===== 提示词全文弹窗 ===== */
+let pfModalCur = null;
+function ensurePfModal() {
+  if ($('#pfModal')) return;
+  document.body.insertAdjacentHTML('beforeend', [
+  '<div class="pf-modal-backdrop" id="pfModalBackdrop"></div>',
+  '<div class="pf-modal" id="pfModal" role="dialog" aria-modal="true" aria-label="提示词全文">',
+    '<div class="pf-modal-box">',
+      '<div class="pf-modal-head">',
+        '<div>',
+          '<span class="pf-modal-no" id="pfmNo"></span>',
+          '<h2 class="pf-modal-title" id="pfmTitle"></h2>',
+          '<div class="pf-modal-time" id="pfmTime"></div>',
+        '</div>',
+        '<button class="pf-modal-close" id="pfmClose" aria-label="关闭">',
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+        '</button>',
+      '</div>',
+      '<div class="pf-modal-body">',
+        '<div class="card-scene"><span class="scene-label">使用场景</span><span id="pfmScene"></span></div>',
+        '<div class="pf-modal-content" id="pfmContent"></div>',
+        '<div class="card-example open" id="pfmExampleWrap"><span class="ex-label">使用示例</span><span id="pfmExample"></span></div>',
+      '</div>',
+      '<div class="pf-modal-foot">',
+        '<button class="btn-copy" id="pfmCopy">',
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+          '<span>复制全文</span>',
+        '</button>',
+        '<button class="btn-like" id="pfmLike" aria-label="点赞">',
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+          '<span class="cnt">0</span>',
+        '</button>',
+        '<button class="btn-share" id="pfmShare" aria-label="分享">',
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>',
+          '<span>分享</span>',
+        '</button>',
+      '</div>',
+    '</div>',
+  '</div>'].join(''));
+  $('#pfModalBackdrop').addEventListener('click', closePromptModal);
+  $('#pfmClose').addEventListener('click', closePromptModal);
+}
+function openPromptModal(p) {
+  ensurePfModal();
+  pfModalCur = p;
+  $('#pfmNo').textContent = p.no;
+  $('#pfmTitle').textContent = p.title;
+  $('#pfmTime').textContent = '更新于 ' + fullDate(p.ts);
+  $('#pfmScene').textContent = p.scene;
+  $('#pfmContent').textContent = p.content;
+  const exWrap = $('#pfmExampleWrap');
+  if (p.example) { exWrap.style.display = ''; $('#pfmExample').textContent = p.example; }
+  else exWrap.style.display = 'none';
+  $('#pfmLike').classList.toggle('liked', state.liked.has(p.id));
+  $('#pfmLike .cnt').textContent = likeCount(p);
+  $('#pfModalBackdrop').classList.add('show');
+  $('#pfModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  $('#pfmCopy').onclick = async () => {
+    const ok = await copyText(fullText(p));
+    if (ok) { toast('完整提示词（含场景与示例）已复制'); pfLog('copy', p.id); }
+    else toast('复制失败，请手动选择文本复制', true);
+  };
+  $('#pfmLike').onclick = () => doLike(p);
+  $('#pfmShare').onclick = () => shareById(p);
+  pfLog('expand', p.id, { open: true });
+}
+function closePromptModal() {
+  const m = $('#pfModal');
+  if (!m || !m.classList.contains('show')) return;
+  $('#pfModalBackdrop').classList.remove('show');
+  m.classList.remove('show');
+  document.body.style.overflow = '';
+  pfModalCur = null;
+}
+function syncModalLike(p) {
+  if (!pfModalCur || pfModalCur.id !== p.id) return;
+  $('#pfmLike').classList.toggle('liked', state.liked.has(p.id));
+  $('#pfmLike .cnt').textContent = likeCount(p);
+}
 
 $('#tagbar').addEventListener('click', e => {
   const chip = e.target.closest('.tagchip');
@@ -1379,7 +1503,9 @@ function closeDrawers() {
 }
 backdrop.addEventListener('click', closeDrawers);
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && (fbDrawer.classList.contains('open') || subDrawer.classList.contains('open'))) closeDrawers();
+  if (e.key !== 'Escape') return;
+  if ($('#pfModal') && $('#pfModal').classList.contains('show')) { closePromptModal(); return; }
+  if (fbDrawer.classList.contains('open') || subDrawer.classList.contains('open')) closeDrawers();
 });
 $('#fbDrawerClose').addEventListener('click', closeDrawers);
 $('#subDrawerClose').addEventListener('click', closeDrawers);
@@ -1606,7 +1732,6 @@ function handleDeepLink() {
   }
   state.q = ''; state.tags.clear();
   searchInput.value = ''; searchBox.classList.remove('has-q');
-  state.expanded.add(p.id);
   render();
   requestAnimationFrame(() => {
     const sel = '.card[data-id="' + (window.CSS && CSS.escape ? CSS.escape(DEEP_ID) : DEEP_ID) + '"]';
@@ -1617,6 +1742,7 @@ function handleDeepLink() {
       setTimeout(() => el.classList.remove('flash'), 2600);
     }
   });
+  openPromptModal(p);
   pfLog('share_open', DEEP_ID, { found: true });
 }
 
