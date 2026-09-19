@@ -73,7 +73,7 @@ Content-Type: application/json
 | platform | 否 | 引流平台，如 抖音 / Bilibili / 微信公众号 / 小红书 / 知乎 |
 | account | 否 | 引流账号名，≤60 字（署名展示） |
 | url | 否 | 主页链接，http(s):// 开头，非法值会被丢弃 |
-| img | 否 | 配图 dataURL，仅接受 `data:image/(png|jpeg|jpg|webp);base64,` 且 ≤200KB，建议 800px 宽 |
+| img | 否 | 配图 dataURL，仅接受 `data:image/(png|jpeg|jpg|webp|gif);base64,` 且 ≤200KB，建议最长边 1080px 宽 |
 | hp | — | 蜜罐字段，**永远不要填**（填了会被当作机器人，假装成功但不入库） |
 
 响应：`{"ok":true,"id":"u1789…"}`。投稿进入待审队列，站长在后台通过后公开。

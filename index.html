@@ -1616,6 +1616,11 @@ function readImg(file) {
   if (file.size > 5 * 1024 * 1024) { toast('图片超过 5MB，请换一张', true); return; }
   const r = new FileReader();
   r.onload = () => {
+    if (file.type === 'image/gif' && r.result.length > 200 * 1024) {
+      // GIF 动图无法 canvas 压缩（丢帧变静图），超限直接拒绝
+      toast('GIF 动图超 200KB 且无法自动压缩，请用工具缩小后投稿', true);
+      return;
+    }
     subImgData = r.result;
     uploadImg.src = subImgData;
     uploadPreview.classList.add('show');
@@ -1636,7 +1641,7 @@ function setErr(fid, msg) {
   field.querySelector('.err').textContent = msg;
 }
 /* 配图压缩：最长边 ≤800px、JPEG 0.72，目标 ≤200KB（与服务端限制一致） */
-function compressImg(dataUrl, maxEdge, quality) {
+function compressImg(dataUrl, maxEdge) {
   return new Promise(resolve => {
     const img = new Image();
     img.onload = () => {
@@ -1646,7 +1651,14 @@ function compressImg(dataUrl, maxEdge, quality) {
         cv.width = Math.max(1, Math.round(img.width * scale));
         cv.height = Math.max(1, Math.round(img.height * scale));
         cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-        resolve(cv.toDataURL('image/jpeg', quality));
+        const LIMIT = 200 * 1024;
+        const candidates = [
+          cv.toDataURL('image/webp', 0.8),
+          cv.toDataURL('image/png'),
+          cv.toDataURL('image/jpeg', 0.78),
+        ];
+        for (const d of candidates) if (d.length <= LIMIT) return resolve(d);
+        resolve(candidates[candidates.length - 1]);
       } catch (e) { resolve(null); }
     };
     img.onerror = () => resolve(null);
@@ -1674,7 +1686,7 @@ $('#subSubmit').addEventListener('click', async () => {
   try {
     let img = subImgData;
     if (img) {
-      const compressed = await compressImg(img, 800, 0.72);
+      const compressed = await compressImg(img, 1080);
       if (compressed && compressed.length <= 200 * 1024) img = compressed;
       else { img = ''; toast('配图过大未能压缩，本次投稿不含图片'); }
     }
