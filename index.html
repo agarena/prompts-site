@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>优质提示词聚合网站 · Prompt Folio</title>
+<!-- 字体走系统栈（下方 --font-* 的回退），不引 Google Fonts：大陆访问会被阻塞拖慢首屏 -->
+<style>
+/* ============ Design Tokens ============ */
+:root {
+  --paper:        oklch(96.8% 0.012 82);
+  --surface:      oklch(99.2% 0.006 82);
+  --ink:          oklch(28% 0.02 55);
+  --ink-2:        oklch(45% 0.018 55);
+  --ink-3:        oklch(55% 0.014 55);
+  --line:         oklch(90.5% 0.012 70);
+  --line-strong:  oklch(84% 0.015 65);
+  --accent:       oklch(50% 0.14 35);
+  --accent-deep:  oklch(41% 0.13 35);
+  --accent-soft:  oklch(93.5% 0.03 40);
+  --accent-ink:   oklch(98.5% 0.005 80);
+  --success:      oklch(48% 0.11 160);
+  --danger:       oklch(50% 0.15 25);
+  --shadow-md:    0 10px 30px -12px oklch(30% 0.03 50 / 0.25);
+  --shadow-lg:    0 24px 60px -20px oklch(30% 0.03 50 / 0.35);
+  --font-display: "Fraunces", "Songti SC", "STSong", "SimSun", serif;
+  --font-body:    "Instrument Sans", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --radius:       16px;
+  --ease-out:     cubic-bezier(0.22, 1, 0.36, 1);
+  --container:    1280px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+button { font-family: inherit; cursor: pointer; }
+input, select, textarea { font-family: inherit; }
+a { color: inherit; }
+::selection { background: var(--accent-soft); color: var(--accent-deep); }
+
+/* ============ Topbar ============ */
+.topbar {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 22px 40px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.brand { display: flex; align-items: baseline; gap: 12px; text-decoration: none; color: inherit; }
+.brand .mark {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--accent);
+  letter-spacing: -0.01em;
+}
+.brand .zh { font-size: 1rem; font-weight: 600; letter-spacing: 0.14em; }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.btn-ghost-top {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 18px; font-size: 0.875rem; font-weight: 600;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  transition: all 0.25s var(--ease-out);
+}
+.btn-ghost-top:hover { border-color: var(--ink-3); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-ghost-top svg { width: 16px; height: 16px; }
+.btn-primary-top {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; font-size: 0.875rem; font-weight: 650;
+  color: var(--accent-ink); background: var(--accent);
+  border: none; border-radius: 999px;
+  transition: all 0.25s var(--ease-out);
+}
+.btn-primary-top:hover { background: var(--accent-deep); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-primary-top svg { width: 16px; height: 16px; }
+
+/* ============ Hero (desktop-first) ============ */
+.hero {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 40px 40px 36px;
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 56px;
+  align-items: center;
+}
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 0.8rem; font-weight: 650;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent-deep);
+  margin-bottom: 16px;
+}
+.eyebrow::before {
+  content: ''; width: 26px; height: 1px; background: var(--accent);
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 560;
+  font-size: clamp(2rem, 3.4vw, 3rem);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+}
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero .lede {
+  margin-top: 16px;
+  max-width: 52ch;
+  color: var(--ink-2);
+  font-size: 1rem;
+}
+.hero-cta { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-hero-primary {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 13px 26px; font-size: 0.95rem; font-weight: 650;
+  color: var(--accent-ink); background: var(--ink);
+  border: none; border-radius: 999px;
+  transition: all 0.25s var(--ease-out);
+}
+.btn-hero-primary:hover { background: var(--accent-deep); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.btn-hero-primary svg { width: 16px; height: 16px; }
+.btn-hero-ghost {
+  padding: 13px 24px; font-size: 0.95rem; font-weight: 600;
+  color: var(--ink); background: transparent;
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  transition: all 0.25s var(--ease-out);
+}
+.btn-hero-ghost:hover { border-color: var(--ink-3); transform: translateY(-2px); }
+.hero .stats {
+  margin-top: 34px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 44px;
+}
+.hero .stat .num {
+  font-family: var(--font-display);
+  font-size: 1.8rem; font-weight: 600; line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.hero .stat .lbl { margin-top: 6px; font-size: 0.78rem; color: var(--ink-3); letter-spacing: 0.04em; }
+
+/* decorative floating cards */
+.hero-visual { position: relative; height: 340px; }
+.float-card {
+  position: absolute;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow-lg);
+  display: flex; flex-direction: column; gap: 10px;
+  animation: floaty 7s ease-in-out infinite;
+}
+.float-card.a { top: 6px; right: 64px; transform: rotate(-3.5deg); z-index: 2; }
+.float-card.b { bottom: 0; right: 0; transform: rotate(2.5deg); animation-delay: -3.5s; }
+@keyframes floaty {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -12px; }
+}
+.float-card .fc-top { display: flex; justify-content: space-between; align-items: baseline; }
+.float-card .fc-no { font-family: var(--font-display); font-style: italic; font-size: 0.75rem; color: var(--ink-3); letter-spacing: 0.08em; }
+.float-card .fc-time { font-size: 0.72rem; color: var(--ink-3); }
+.float-card .fc-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; line-height: 1.35; }
+.float-card .fc-scene {
+  font-size: 0.76rem; color: var(--ink-2); line-height: 1.55;
+  background: var(--paper); border-left: 3px solid var(--accent);
+  padding: 8px 10px; border-radius: 0 8px 8px 0;
+}
+.float-card .fc-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 2px; }
+.float-card .fc-tags { display: flex; gap: 5px; }
+.float-card .fc-tag { font-size: 0.68rem; background: var(--paper); color: var(--ink-2); padding: 3px 9px; border-radius: 999px; }
+.float-card .fc-like { display: inline-flex; align-items: center; gap: 5px; font-size: 0.78rem; font-weight: 650; color: var(--accent-deep); font-variant-numeric: tabular-nums; }
+.float-card .fc-like svg { width: 13px; height: 13px; fill: var(--accent); stroke: var(--accent); }
+
+/* ============ Toolbar (sticky) ============ */
+.toolbar-wrap {
+  position: sticky; top: 0; z-index: 40;
+  background: var(--paper);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.toolbar {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 14px 40px;
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.search { position: relative; flex: 1 1 340px; min-width: 240px; }
+.search > svg {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; color: var(--ink-3); pointer-events: none;
+}
+.search input {
+  width: 100%;
+  padding: 12px 44px 12px 46px;
+  font-size: 0.95rem; color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  outline: none;
+  transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.search input::placeholder { color: var(--ink-3); }
+.search input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.search .clear-q {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  width: 32px; height: 32px; display: none;
+  align-items: center; justify-content: center;
+  border: none; border-radius: 50%; background: transparent; color: var(--ink-3);
+  transition: color 0.2s, background 0.2s;
+}
+.search .clear-q:hover { color: var(--ink); background: var(--paper); }
+.search .clear-q svg { width: 14px; height: 14px; pointer-events: none; }
+.search.has-q .clear-q { display: inline-flex; }
+
+.sortseg {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 999px; padding: 4px; gap: 2px;
+}
+.sortseg button {
+  border: none; background: transparent;
+  padding: 9px 16px;
+  font-size: 0.85rem; font-weight: 600; color: var(--ink-2);
+  border-radius: 999px; white-space: nowrap;
+  transition: background 0.25s var(--ease-out), color 0.25s var(--ease-out);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.sortseg button svg { width: 14px; height: 14px; }
+.sortseg button:hover { color: var(--ink); }
+.sortseg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+.count {
+  margin-left: auto;
+  font-size: 0.85rem; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.count strong { color: var(--ink); font-weight: 650; }
+
+/* ============ Tag filter ============ */
+.tagbar {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 18px 40px 2px;
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.tagchip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 15px;
+  font-size: 0.83rem; font-weight: 550; color: var(--ink-2);
+  background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  transition: all 0.22s var(--ease-out);
+}
+.tagchip .n { font-size: 0.72rem; color: var(--ink-3); font-variant-numeric: tabular-nums; transition: color 0.22s; }
+.tagchip:hover { border-color: var(--ink-3); color: var(--ink); transform: translateY(-1px); }
+.tagchip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-deep); }
+.tagchip.active .n { color: var(--accent); }
+.tagbar .reset {
+  border: none; background: none;
+  font-size: 0.82rem; color: var(--ink-3);
+  text-decoration: underline; text-underline-offset: 3px;
+  padding: 7px 6px; display: none;
+}
+.tagbar .reset.show { display: inline-block; }
+.tagbar .reset:hover { color: var(--accent-deep); }
+
+/* ============ Grid & Cards ============ */
+.grid {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 26px 40px 80px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex; flex-direction: column; gap: 13px;
+  animation: rise 0.55s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 45ms);
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), border-color 0.35s var(--ease-out);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+.card:hover { transform: translateY(-4px); border-color: var(--line-strong); box-shadow: var(--shadow-md); }
+.card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.card-top .no { font-family: var(--font-display); font-style: italic; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-3); }
+.card-top time { font-size: 0.78rem; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.card-title { font-family: var(--font-display); font-weight: 600; font-size: 1.26rem; line-height: 1.35; letter-spacing: -0.005em; }
+.card-scene {
+  font-size: 0.84rem; color: var(--ink-2); line-height: 1.65;
+  background: var(--paper);
+  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  border-radius: 0 10px 10px 0;
+}
+.card-scene .scene-label {
+  display: inline-block;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--accent-deep);
+  margin-right: 8px;
+  text-transform: uppercase;
+}
+.card-img { width: 100%; height: 170px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.card-tags .tag {
+  border: none; background: var(--paper); color: var(--ink-2);
+  font-size: 0.75rem; font-weight: 550;
+  padding: 4px 11px; border-radius: 999px; letter-spacing: 0.02em;
+  transition: background 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+.card-tags .tag:hover { background: var(--accent-soft); color: var(--accent-deep); }
+.card-content {
+  color: var(--ink-2); font-size: 0.9rem; line-height: 1.75;
+  white-space: pre-line;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-content.open { display: block; }
+.card-example {
+  background: oklch(97% 0.008 82);
+  border: 1px dashed var(--line-strong);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 0.84rem; color: var(--ink-2); line-height: 1.7;
+  white-space: pre-line;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-example.open { display: block; }
+.card-example .ex-label {
+  display: block;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+  color: var(--ink-3); margin-bottom: 6px; text-transform: uppercase;
+}
+.card-content mark, .card-title mark, .card-scene mark, .card-example mark, .tagchip mark {
+  background: var(--accent-soft); color: var(--accent-deep);
+  border-radius: 3px; padding: 0 2px;
+}
+.btn-expand {
+  align-self: flex-start;
+  border: none; background: none; padding: 2px 0;
+  font-size: 0.82rem; font-weight: 600; color: var(--accent);
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+.btn-expand:hover { color: var(--accent-deep); text-decoration: underline; text-underline-offset: 3px; }
+.card-foot {
+  margin-top: auto;
+  padding-top: 15px;
+  border-top: 1px solid var(--line);
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+}
+.author { display: inline-flex; align-items: center; gap: 9px; font-size: 0.83rem; min-width: 0; }
+.author .avatar {
+  width: 30px; height: 30px; flex: none;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 650; color: var(--accent-ink);
+  background: var(--av, oklch(65% 0.1 60));
+}
+.plat-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: none; background: none; padding: 0;
+  font-size: 0.8rem; font-weight: 600; color: var(--ink-2);
+  text-decoration: none;
+  min-width: 0;
+  max-width: 100%;
+  transition: color 0.2s;
+}
+.plat-link .acct {
+  color: var(--accent-deep);
+  max-width: 128px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.plat-link .goto { white-space: nowrap; color: var(--ink-3); font-weight: 550; }
+.plat-link .arr { flex: none; transition: transform 0.22s var(--ease-out); color: var(--accent-deep); }
+.plat-link:hover .acct { text-decoration: underline; text-underline-offset: 3px; }
+.plat-link:hover .arr { transform: translateX(3px); }
+.plat-link:hover .goto { color: var(--accent-deep); }
+.actions { display: inline-flex; align-items: center; gap: 8px; }
+.btn-copy {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px;
+  font-size: 0.85rem; font-weight: 650;
+  color: var(--accent-ink); background: var(--accent);
+  border: none; border-radius: 10px;
+  transition: background 0.25s var(--ease-out), transform 0.2s var(--ease-out);
+}
+.btn-copy svg { width: 15px; height: 15px; }
+.btn-copy:hover { background: var(--accent-deep); transform: translateY(-1px); }
+.btn-copy:active { transform: scale(0.97); }
+.btn-copy.copied { background: var(--success); }
+.btn-like, .btn-card-fb, .btn-share {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 13px;
+  font-size: 0.85rem; font-weight: 600; color: var(--ink-2);
+  background: transparent;
+  border: 1px solid var(--line-strong); border-radius: 10px;
+  transition: all 0.22s var(--ease-out);
+  font-variant-numeric: tabular-nums;
+}
+.btn-like svg, .btn-card-fb svg, .btn-share svg { width: 15px; height: 15px; }
+.btn-like:hover, .btn-card-fb:hover, .btn-share:hover { border-color: var(--ink-3); color: var(--ink); transform: translateY(-1px); }
+.btn-like.liked { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-deep); }
+.btn-like.liked svg { fill: var(--accent); stroke: var(--accent); animation: heartpop 0.45s var(--ease-out); }
+@keyframes heartpop {
+  0% { transform: scale(1); } 35% { transform: scale(1.45); }
+  70% { transform: scale(0.92); } 100% { transform: scale(1); }
+}
+/* 分享深链落地时的高亮描边 */
+.card.flash { border-color: var(--accent); animation: flashring 2.4s var(--ease-out); }
+@keyframes flashring {
+  0%   { box-shadow: 0 0 0 6px var(--accent-soft), var(--shadow-lg); }
+  70%  { box-shadow: 0 0 0 3px var(--accent-soft); }
+  100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+}
+/* 蜜罐字段：人类不可见也不可聚焦，机器人可能填 */
+.hp { position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.btn-submit:disabled { opacity: 0.6; transform: none; }
+
+/* ============ Empty state ============ */
+.empty {
+  display: none;
+  max-width: 560px;
+  margin: 24px auto 80px;
+  padding: 56px 32px;
+  text-align: center;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.empty.show { display: block; animation: rise 0.4s var(--ease-out) both; }
+.empty svg { width: 72px; height: 72px; color: var(--ink-3); margin-bottom: 18px; }
+.empty h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; margin-bottom: 8px; }
+.empty p { color: var(--ink-2); font-size: 0.92rem; margin-bottom: 22px; }
+.empty .q { color: var(--accent-deep); font-weight: 600; }
+.btn-reset {
+  padding: 11px 24px; font-size: 0.88rem; font-weight: 650;
+  color: var(--accent-ink); background: var(--ink);
+  border: none; border-radius: 999px;
+  transition: all 0.2s var(--ease-out);
+}
+.btn-reset:hover { background: var(--accent-deep); transform: translateY(-1px); }
+
+/* ============ Footer ============ */
+footer {
+  border-top: 1px solid var(--line);
+  padding: 28px 40px 40px;
+  text-align: center;
+  color: var(--ink-3); font-size: 0.82rem;
+}
+footer em { font-family: var(--font-display); }
+
+/* ============ Drawers & backdrop ============ */
+.backdrop {
+  position: fixed; inset: 0;
+  background: rgba(28, 20, 16, 0.42);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s var(--ease-out);
+  z-index: 60;
+}
+.backdrop.show { opacity: 1; pointer-events: auto; }
+.drawer {
+  position: fixed; top: 0; right: 0;
+  height: 100dvh;
+  width: min(480px, 100%);
+  background: var(--surface);
+  z-index: 70;
+  transform: translateX(102%);
+  transition: transform 0.5s var(--ease-out);
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.drawer.wide { width: min(560px, 100%); }
+.drawer.open { transform: none; }
+.drawer-head {
+  padding: 26px 28px 20px;
+  border-bottom: 1px solid var(--line);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+}
+.drawer-head h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; }
+.drawer-head p { margin-top: 6px; font-size: 0.85rem; color: var(--ink-2); }
+.drawer-close {
+  width: 40px; height: 40px; flex: none;
+  border: 1px solid var(--line-strong); border-radius: 50%;
+  background: var(--surface); color: var(--ink-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.2s var(--ease-out);
+}
+.drawer-close:hover { border-color: var(--ink-3); color: var(--ink); transform: rotate(90deg); }
+.drawer-close svg { width: 16px; height: 16px; }
+.drawer-body { padding: 24px 28px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 22px; }
+.field label.flabel {
+  display: block;
+  font-size: 0.8rem; font-weight: 650; letter-spacing: 0.04em;
+  color: var(--ink-2); margin-bottom: 10px;
+}
+.flabel .req { color: var(--accent); margin-left: 2px; }
+.fbtypes { display: flex; gap: 8px; flex-wrap: wrap; }
+.fbtype {
+  padding: 9px 18px; font-size: 0.86rem; font-weight: 600;
+  color: var(--ink-2); background: var(--paper);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  transition: all 0.22s var(--ease-out);
+}
+.fbtype:hover { border-color: var(--ink-3); color: var(--ink); }
+.fbtype[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.field select, .field textarea, .field input[type="text"] {
+  width: 100%;
+  font-size: 0.92rem; color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line-strong); border-radius: 12px;
+  padding: 12px 14px; outline: none;
+  transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.field select:focus, .field textarea:focus, .field input[type="text"]:focus {
+  border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.field textarea { resize: vertical; min-height: 120px; line-height: 1.7; }
+.field .hint {
+  margin-top: 8px; font-size: 0.78rem; color: var(--ink-3);
+  display: flex; justify-content: space-between; gap: 12px;
+}
+.field .hint .err { color: var(--danger); font-weight: 600; }
+.field.invalid input, .field.invalid textarea, .field.invalid select { border-color: var(--danger); }
+.field.invalid .scene-combo { border-color: var(--danger); }
+.drawer-foot { padding: 18px 28px 26px; border-top: 1px solid var(--line); }
+.btn-submit {
+  width: 100%; padding: 14px;
+  font-size: 0.95rem; font-weight: 650;
+  color: var(--accent-ink); background: var(--accent);
+  border: none; border-radius: 12px;
+  transition: all 0.25s var(--ease-out);
+}
+.btn-submit:hover { background: var(--accent-deep); transform: translateY(-1px); }
+.btn-submit:active { transform: scale(0.99); }
+
+/* scene combo input: 当 [___] 时，请使用本提示词 */
+.scene-combo {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--paper);
+  border: 1px solid var(--line-strong); border-radius: 12px;
+  padding: 4px 6px 4px 14px;
+  transition: border-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.scene-combo:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.scene-combo .fix {
+  font-size: 0.92rem; color: var(--ink-3); white-space: nowrap; user-select: none;
+}
+.scene-combo input {
+  flex: 1; min-width: 60px;
+  border: none; background: transparent; outline: none;
+  padding: 8px 6px; font-size: 0.92rem; color: var(--ink);
+}
+
+/* upload */
+.upload-box {
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 12px;
+  padding: 22px;
+  text-align: center;
+  color: var(--ink-3); font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-out);
+}
+.upload-box:hover, .upload-box.dragover { border-color: var(--accent); color: var(--accent-deep); background: var(--accent-soft); }
+.upload-box svg { width: 26px; height: 26px; margin-bottom: 8px; }
+.upload-box input { display: none; }
+.upload-preview { position: relative; display: none; }
+.upload-preview.show { display: block; }
+.upload-preview img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 12px; border: 1px solid var(--line); }
+.upload-preview .rm-img {
+  position: absolute; top: 8px; right: 8px;
+  width: 30px; height: 30px;
+  border: none; border-radius: 50%;
+  background: rgba(28,20,16,0.55); color: #fff;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.upload-preview .rm-img:hover { background: var(--danger); }
+.upload-preview .rm-img svg { width: 14px; height: 14px; margin: 0; }
+
+/* ============ Toast ============ */
+.toast {
+  position: fixed; left: 50%; bottom: 32px;
+  transform: translate(-50%, 24px);
+  z-index: 90;
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 22px;
+  font-size: 0.9rem; font-weight: 600; color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong); border-radius: 999px;
+  box-shadow: var(--shadow-lg);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.35s var(--ease-out), transform 0.35s var(--ease-out);
+  max-width: min(90vw, 520px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex: none; }
+.toast.error .dot { background: var(--danger); }
+
+/* ============ Responsive (desktop-first, mobile-adapted) ============ */
+@media (max-width: 1080px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-grid { gap: 36px; }
+  .float-card.a { right: 30px; }
+}
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero-visual { display: none; }
+  .topbar, .hero, .toolbar, .tagbar, .grid { padding-left: 24px; padding-right: 24px; }
+  .hero { padding-top: 32px; }
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; padding-left: 20px; padding-right: 20px; }
+  .topbar { padding-top: 16px; }
+  .brand .zh { display: none; }
+  .btn-ghost-top span, .btn-primary-top span { display: none; }
+  .btn-ghost-top, .btn-primary-top { padding: 10px 13px; }
+  .toolbar { gap: 12px; }
+  .search { flex: 1 1 100%; order: -1; }
+  .count { margin-left: auto; }
+  .sortseg button { padding: 8px 12px; font-size: 0.8rem; }
+  .card-foot { flex-direction: column; align-items: stretch; }
+  .actions { display: flex; }
+  .btn-copy, .btn-like, .btn-card-fb, .btn-share { flex: 1; justify-content: center; }
+  .hero .stats { gap: 28px; }
+  .drawer, .drawer.wide { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <a class="brand" href="#">
+    <span class="mark">Prompt&nbsp;Folio</span>
+    <span class="zh">提示词集</span>
+  </a>
+  <div class="top-actions">
+    <button class="btn-ghost-top" id="topFeedback">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>反馈</span>
+    </button>
+    <button class="btn-primary-top" id="topSubmit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>提交提示词</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <p class="eyebrow">A curated deck of prompts</p>
+      <h1>把好用的提示词，<br>一张张<em>收进卡片盒</em>。</h1>
+      <p class="lede">每张卡片都写清了使用场景、正文与示例——看到合适的，展开、复制、拿去就用。也欢迎你投稿私藏的好提示词，附上你的账号与主页，让读者顺藤摸瓜关注你。</p>
+      <div class="hero-cta">
+        <button class="btn-hero-primary" id="heroSubmit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          投稿一张卡片
+        </button>
+        <button class="btn-hero-ghost" id="heroFeedback">提个建议</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="num" id="statTotal">0</div><div class="lbl">收录提示词</div></div>
+        <div class="stat"><div class="num" id="statTags">0</div><div class="lbl">分类标签</div></div>
+        <div class="stat"><div class="num" id="statLikes">0</div><div class="lbl">累计获赞</div></div>
+      </div>
+    </div>
+    <div class="hero-visual" aria-hidden="true">
+      <div class="float-card a">
+        <div class="fc-top"><span class="fc-no">PF-04</span><span class="fc-time">4 天前</span></div>
+        <div class="fc-title">周报 60 秒生成器</div>
+        <div class="fc-scene">当周五下班前要交周报、手上只有一堆零散要点时，请使用本提示词。</div>
+        <div class="fc-foot">
+          <span class="fc-tags"><span class="fc-tag">效率</span><span class="fc-tag">写作</span></span>
+          <span class="fc-like"><svg viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>891</span>
+        </div>
+      </div>
+      <div class="float-card b">
+        <div class="fc-top"><span class="fc-no">PF-11</span><span class="fc-time">24 天前</span></div>
+        <div class="fc-title">费曼学习法讲解任何概念</div>
+        <div class="fc-scene">当你学了一个新概念感觉懂了、想验证是不是真懂时，请使用本提示词。</div>
+        <div class="fc-foot">
+          <span class="fc-tags"><span class="fc-tag">学习</span></span>
+          <span class="fc-like"><svg viewBox="0 0 24 24"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>512</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar-wrap">
+  <div class="toolbar">
+    <div class="search" id="searchBox">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="searchInput" placeholder="搜索标题、使用场景、内容、标签或作者…" aria-label="搜索提示词">
+      <button class="clear-q" id="clearQ" aria-label="清空搜索">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="sortseg" role="group" aria-label="排序方式">
+      <button data-sort="desc" aria-pressed="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+        最新更新
+      </button>
+      <button data-sort="asc" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+        最早更新
+      </button>
+      <button data-sort="likes" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        最多点赞
+      </button>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<nav class="tagbar" id="tagbar" aria-label="按标签筛选">
+  <button class="reset" id="resetFilters">清除全部筛选</button>
+</nav>
+
+<main class="grid" id="grid" aria-live="polite"></main>
+
+<section class="empty" id="empty">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8.5 11h5M11 8.5v5"/></svg>
+  <h3>没有找到匹配的卡片</h3>
+  <p>没有命中 <span class="q" id="emptyQ"></span> 的结果。试试更短的关键词，或者清除筛选条件。</p>
+  <button class="btn-reset" id="emptyReset">清除搜索与筛选</button>
+</section>
+
+<footer>
+  <p><em>Prompt Folio</em> · 优质提示词聚合网站 — 用一张张卡片，安放好用的提示词。投稿即同意署名展示你的引流账号与主页链接。</p>
+  <p style="margin-top:8px" id="brandCredit"></p>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+
+<!-- Feedback drawer -->
+<aside class="drawer" id="fbDrawer" role="dialog" aria-modal="true" aria-labelledby="fbDrawerTitle">
+  <div class="drawer-head">
+    <div>
+      <h2 id="fbDrawerTitle">提交反馈</h2>
+      <p>评价、建议、问题都可以说，我们都会认真阅读。</p>
+    </div>
+    <button class="drawer-close" id="fbDrawerClose" aria-label="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body">
+    <div class="field">
+      <span class="flabel" id="fbTypeLabel">反馈类型</span>
+      <div class="fbtypes" role="group" aria-labelledby="fbTypeLabel">
+        <button class="fbtype" data-fbtype="评价" aria-pressed="true">评价</button>
+        <button class="fbtype" data-fbtype="建议" aria-pressed="false">建议</button>
+        <button class="fbtype" data-fbtype="问题" aria-pressed="false">问题</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="flabel" for="fbPrompt">关联提示词（可选）</label>
+      <select id="fbPrompt"></select>
+    </div>
+    <div class="field">
+      <label class="flabel" for="fbText">详细描述</label>
+      <textarea id="fbText" placeholder="想说什么都可以，比如：哪张卡片特别好用、想要什么新功能、发现了什么问题…"></textarea>
+      <div class="hint"><span class="err" id="fbErr"></span><span id="fbCount">0 / 500</span></div>
+    </div>
+    <input class="hp" type="text" id="fbHp" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+  </div>
+  <div class="drawer-foot">
+    <button class="btn-submit" id="fbSubmit">提交反馈</button>
+  </div>
+</aside>
+
+<!-- Submit prompt drawer -->
+<aside class="drawer wide" id="subDrawer" role="dialog" aria-modal="true" aria-labelledby="subDrawerTitle">
+  <div class="drawer-head">
+    <div>
+      <h2 id="subDrawerTitle">投稿一张提示词</h2>
+      <p>标题、使用场景、正文为必填；示例、图片与主页链接选填。账号与主页会展示在卡片上为读者引流。投稿经审核通过后展示。</p>
+    </div>
+    <button class="drawer-close" id="subDrawerClose" aria-label="关闭">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body">
+    <div class="field" id="fTitle">
+      <label class="flabel" for="subTitle">标题<span class="req">*</span></label>
+      <input type="text" id="subTitle" maxlength="50" placeholder="给这张卡片起个名字，如：周报 60 秒生成器">
+      <div class="hint"><span class="err"></span><span class="cnt">0 / 50</span></div>
+    </div>
+    <div class="field" id="fScene">
+      <label class="flabel" for="subScene">使用场景<span class="req">*</span></label>
+      <div class="scene-combo">
+        <span class="fix">当</span>
+        <input type="text" id="subScene" maxlength="60" placeholder="描述什么情况下用它，如：你写完 PRD 担心开发有歧义">
+        <span class="fix">时，请使用本提示词</span>
+      </div>
+      <div class="hint"><span class="err"></span><span class="cnt">0 / 60</span></div>
+    </div>
+    <div class="field" id="fContent">
+      <label class="flabel" for="subContent">提示词内容<span class="req">*</span></label>
+      <textarea id="subContent" maxlength="2000" placeholder="把完整的提示词贴在这里。支持用 {变量} 标出需要替换的部分…"></textarea>
+      <div class="hint"><span class="err"></span><span class="cnt">0 / 2000</span></div>
+    </div>
+    <div class="field" id="fExample">
+      <label class="flabel" for="subExample">使用示例（选填）</label>
+      <textarea id="subExample" maxlength="800" style="min-height:90px" placeholder="给一段输入与输出示例，帮助别人快速判断这张卡片合不合用…"></textarea>
+      <div class="hint"><span class="err"></span><span class="cnt">0 / 800</span></div>
+    </div>
+    <div class="field">
+      <span class="flabel">配图（选填）</span>
+      <label class="upload-box" id="uploadBox">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+        <div>点击选择图片，或拖拽到此处</div>
+        <div style="font-size:0.75rem;margin-top:4px;opacity:0.75">支持 PNG / JPG / WebP，将自动压缩后随投稿上传</div>
+        <input type="file" id="subImg" accept="image/*">
+      </label>
+      <div class="upload-preview" id="uploadPreview">
+        <img id="uploadImg" alt="配图预览">
+        <button class="rm-img" id="rmImg" aria-label="移除图片">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="flabel" for="subPlatform">引流平台（选填）</label>
+      <select id="subPlatform">
+        <option value="">无</option>
+        <option>抖音</option>
+        <option>Bilibili</option>
+        <option>微信公众号</option>
+        <option>个人微信号</option>
+        <option>小红书</option>
+        <option>微博</option>
+        <option>知乎</option>
+        <option>X（Twitter）</option>
+        <option>快手</option>
+        <option>其他</option>
+      </select>
+    </div>
+    <div class="field" id="fAccount">
+      <label class="flabel" for="subAccount">账号名称</label>
+      <input type="text" id="subAccount" maxlength="30" placeholder="先选择引流平台" disabled>
+      <div class="hint"><span class="err"></span><span class="cnt">0 / 30</span></div>
+    </div>
+    <div class="field" id="fUrl">
+      <label class="flabel" for="subUrl">作者主页链接（选填）</label>
+      <input type="text" id="subUrl" maxlength="200" placeholder="https://… 填写后读者点击账号可跳转你的主页">
+      <div class="hint"><span class="err"></span><span class="cnt">0 / 200</span></div>
+    </div>
+    <input class="hp" type="text" id="subHp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  </div>
+  <div class="drawer-foot">
+    <button class="btn-submit" id="subSubmit">提交收录</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status"><span class="dot"></span><span id="toastText"></span></div>
+
+<script>
+/* ================= Data ================= */
+/* 兜底数据：与 analytics-worker/seed.sql 的官方提示词保持一致。
+   接口 /api/prompts 可用时以服务端为准，此处仅在拉取失败时降级展示。改一处需同步另一处。 */
+const DAY = 86400000;
+const NOW = Date.now();
+const RAW = [
+  {
+    id: 'pf01', title: '公众号爆文结构生成器', author: '林晚', platform: '微信公众号', account: '@林晚的文字铺', url: '', days: 1, likes: 342,
+    tags: ['写作', '营销'],
+    scene: '当你要发布公众号深度长文、希望文章结构自带转发点时，请使用本提示词。',
+    content: '你是一位拥有十年经验的新媒体主编。请围绕「{主题}」写一篇公众号文章，严格遵循以下结构：\n1. 开头用一个具体的痛点场景切入，让读者立刻代入；\n2. 第二段抛出一个反常识的观点，制造认知冲突；\n3. 中间用三个小标题拆解方法论，每部分配一个真实案例；\n4. 结尾用一句可以单独转发的金句收束，并自然引导点赞在看。\n全文 1500 字左右，语气真诚克制，避免标题党和空洞口号。',
+    example: '输入：主题「为什么你总是存不下钱」\n输出：痛点场景开头 → 反常识观点「省钱的关键不是少花，而是先存后花」→ 三段方法论各配案例 → 金句收尾 + 引导在看。'
+  },
+  {
+    id: 'pf02', title: '代码评审助手（严格模式）', author: '周栈', platform: '知乎', account: '@周栈', url: 'https://www.zhihu.com/people/zhouzhan', days: 2, likes: 518,
+    tags: ['编程', '效率'],
+    scene: '当你要提交或评审一段重要代码、想在被追问之前先排掉隐患时，请使用本提示词。',
+    content: '你是一名以挑剔著称的资深工程师。请对下面的代码进行严格评审，按以下维度逐条列出问题：\n- 潜在 bug（边界条件、空值、并发）；\n- 性能隐患（不必要的循环、内存分配）；\n- 可读性（命名、职责划分、重复代码）。\n每个问题请标注严重级别（阻断 / 重要 / 建议），给出具体行号和修改示例。最后输出一段总体评价和重构优先级建议。不要客套，直接指出问题。代码如下：\n```{代码}```',
+    example: '输入：一段 40 行的用户注册接口代码\n输出：阻断问题 1 个（手机号未校验格式）、重要问题 2 个、建议 3 条，附行号与修改 diff。'
+  },
+  {
+    id: 'pf03', title: 'SQL 查询逐行解释器', author: 'Ada 王', platform: 'Bilibili', account: '@Ada王讲数据', url: 'https://space.bilibili.com/390214857', days: 3, likes: 276,
+    tags: ['编程', '数据分析'],
+    scene: '当你拿到一条看不懂的 SQL、或要向别人解释它的作用时，请使用本提示词。',
+    content: '你是一位耐心的数据库讲师。请逐行解释下面这条 SQL 查询：每一行在做什么、为什么这样写、有没有更优的替代写法。然后用一段话总结整条查询的业务含义，并指出至少一个潜在的性能问题（比如缺少索引、隐式类型转换），给出优化后的版本。\nSQL 如下：\n```{SQL}```',
+    example: '输入：一条三层嵌套的 GROUP BY 查询\n输出：逐行含义 + 业务总结「统计各渠道近 30 天下单转化率」+ 优化建议（建复合索引）。'
+  },
+  {
+    id: 'pf04', title: '周报 60 秒生成器', author: '拖延症晚期', platform: '小红书', account: '@下班后的阿拖', url: 'https://www.xiaohongshu.com/user/profile/5e2b1c8a0000000001003f2a', days: 4, likes: 891,
+    tags: ['效率', '写作'],
+    scene: '当你周五下班前要交周报、手上只有一堆零散要点时，请使用本提示词。',
+    content: '请把我的工作要点整理成一份结构清晰的周报。输入是我随手列的要点：\n{要点}\n要求：\n1. 按「本周完成 / 进行中 / 下周计划 / 需要支持」四段输出；\n2. 每项以动词开头，一句话说完，突出结果而非过程；\n3. 涉及数据的地方用具体数字；\n4. 整体控制在 300 字以内，语气专业不浮夸；\n5. 最后给一句 50 字以内的向上汇报口径，方便我口头同步给领导。',
+    example: '输入：①完成订单导出功能 ②跟进 3 个客户反馈 ③下周想做退款流程优化\n输出：四段式周报 + 一句口头汇报口径。'
+  },
+  {
+    id: 'pf05', title: '产品需求文档润色师', author: '沈青', platform: '微信公众号', account: '@沈青产品笔记', url: '', days: 6, likes: 154,
+    tags: ['产品', '写作'],
+    scene: '当你写完 PRD 草稿、担心开发同学读完仍有歧义时，请使用本提示词。',
+    content: '你是一位资深产品经理。请润色下面这段 PRD 草稿，目标是让开发同学读完零歧义：\n{PRD 内容}\n请检查并修正：\n1. 需求背景是否说清了「为什么做」；\n2. 功能描述是否可验收（补充验收标准 Given/When/Then）；\n3. 边界情况和异常流程是否覆盖（空态、超时、权限不足）；\n4. 删掉所有形容词，只保留事实和规则。\n输出润色后的完整版本，并在文末列出你改动的三个关键点。'
+  },
+  {
+    id: 'pf06', title: '中文描述转 Midjourney 提示词', author: '陆离', platform: 'Bilibili', account: '@陆离的调色盘', url: 'https://space.bilibili.com/20473861', days: 8, likes: 623,
+    tags: ['设计', '创意'],
+    scene: '当你脑子里有画面、但不知道怎么写成 AI 绘画提示词时，请使用本提示词。',
+    content: '你是一位 AI 绘画提示词专家。请把我的中文画面描述翻译成一条高质量的 Midjourney 英文提示词，严格按照这个顺序组织：\n主体（谁，在做什么）→ 环境（时间、地点、氛围）→ 光线（方向、质感）→ 风格（媒介、参考艺术家或流派）→ 构图与镜头（视角、焦段）→ 参数（--ar 宽高比 --v 版本 --s 风格化）。\n要求：用具体名词替代抽象形容词；主体特征放在最前；给出 2 个不同风格的版本供我选择。\n我的描述：{中文描述}',
+    example: '输入：一只在图书馆打瞌睡的橘猫\n输出：版本 A 吉卜力水彩风、版本 B 赛博霓虹风，均含 --ar 16:9 --v 6 参数。'
+  },
+  {
+    id: 'pf07', title: '文言文今译互转', author: '顾之', platform: '知乎', account: '@顾之', url: 'https://www.zhihu.com/people/guzhi', days: 11, likes: 208,
+    tags: ['翻译', '学习'],
+    scene: '当你读到一段文言文想彻底读懂、或想把自己的文字译成文言时，请使用本提示词。',
+    content: '你是一位精通古代汉语的学者。请完成以下任务：\n若输入文言文：先逐句对译成现代汉语，再整体润色为通顺白话，最后注释其中的实词活用、特殊句式和文化常识（至少 3 处）。\n若输入现代文：改写为文从字顺的文言文，注明用了哪些文言虚词和句式。\n翻译以「信、达、雅」为序，宁可质朴不可错译。原文如下：\n{原文}'
+  },
+  {
+    id: 'pf08', title: '面试反问环节设计', author: '榛果', platform: '小红书', account: '@榛果求职', url: 'https://www.xiaohongshu.com/user/profile/6021c98b0000000001017c88', days: 13, likes: 445,
+    tags: ['求职', '效率'],
+    scene: '当面试接近尾声、面试官问你「还有什么想问的」时，请使用本提示词。',
+    content: '你是一位资深职业规划师。我即将面试「{岗位}」职位，公司行业是「{行业}」，面试轮次是「{第几轮}」。\n请帮我设计 5 个反问面试官的问题，要求：\n1. 前 2 个展现我对岗位的理解深度；\n2. 第 3 个了解团队协作方式和直属领导风格；\n3. 第 4 个判断岗位的成长空间和考核标准；\n4. 最后 1 个留下好印象的收尾问题。\n每个问题附一句「为什么要问这个」的说明。',
+    example: '输入：岗位「产品经理」、行业「跨境电商」、第三轮（总监面）\n输出：5 个分目的反问问题，每个附提问理由。'
+  },
+  {
+    id: 'pf09', title: '会议纪要 30 秒提炼', author: '大周', platform: '个人微信号', account: 'zhou-biji', url: '', days: 16, likes: 367,
+    tags: ['效率'],
+    scene: '当你开完一场信息量很大的会、需要快速沉淀纪要与行动项时，请使用本提示词。',
+    content: '请把下面的会议记录整理成结构化纪要：\n{会议记录}\n输出格式：\n【结论】今天拍板了哪几件事，一句话一条；\n【行动项】表格：事项 / 负责人 / 截止时间，只收录有明确责任人的事项；\n【悬而未决】哪些问题没结论，下次会议需要带什么信息来推进；\n【风险提示】我注意到的任何资源或时间风险。\n只记录事实，不要脑补记录里没有的信息。'
+  },
+  {
+    id: 'pf10', title: '小红书标题 A/B 生成', author: '桃沢', platform: '小红书', account: '@桃沢运营手记', url: 'https://www.xiaohongshu.com/user/profile/5f8a2b1c0000000001019d11', days: 20, likes: 289,
+    tags: ['营销', '写作'],
+    scene: '当你笔记内容写好了、卡在标题不知道怎么起时，请使用本提示词。',
+    content: '你是小红书头部操盘手。我的笔记主题是「{主题}」，目标人群是「{人群}」。\n请生成 10 个标题，分 5 组 A/B 对照：\n1. 数字型 vs 悬念型；\n2. 痛点型 vs 利益型；\n3. 第一人称经历型 vs 干货清单型。\n每个标题 20 字以内，符合小红书语气，避免夸张违禁词。最后告诉我你会先测哪两组，以及判断依据。'
+  },
+  {
+    id: 'pf11', title: '费曼学习法讲解任何概念', author: '陈默', platform: '知乎', account: '@陈默说学习', url: 'https://www.zhihu.com/people/chenmoshuo', days: 24, likes: 512,
+    tags: ['学习'],
+    scene: '当你学了一个新概念感觉懂了、想验证自己是不是真懂时，请使用本提示词。',
+    content: '请用费曼学习法向我讲解「{概念}」。分四步：\n1. 用最朴素的语言解释，就像讲给 12 岁孩子听，禁止使用任何专业术语；\n2. 用一个生活里的类比帮我建立直觉；\n3. 回到严谨表述，指出我朴素理解里会出错的一个地方；\n4. 出 3 道由浅入深的自测题，让我确认真的懂了。\n如果这个概念有常见误解，请单独列出来辨析。',
+    example: '输入：区块链\n输出：给 12 岁孩子的解释 + 「全村记账本」类比 + 常见误解辨析 + 3 道自测题。'
+  },
+  {
+    id: 'pf12', title: '正则表达式构造器', author: '老白', platform: 'Bilibili', account: '@老白敲代码', url: 'https://space.bilibili.com/16681129', days: 28, likes: 198,
+    tags: ['编程'],
+    scene: '当你要写正则但只会死记硬背、担心写出灾难性回溯时，请使用本提示词。',
+    content: '你是正则表达式专家。我想匹配以下文本规则：「{用自然语言描述匹配规则}」。\n请：\n1. 给出正则表达式，并逐段解释每个符号的作用；\n2. 列出 3 个能匹配和 2 个不能匹配的具体例子；\n3. 指出这个正则可能的性能陷阱（如灾难性回溯）并给出更安全的写法；\n4. 同时给出 JavaScript 和 Python 两种用法示例。'
+  }
+];
+let SERVER_MODE = false; // /api/prompts 拉取成功后置 true：点赞计数以服务端为准
+let PROMPTS = RAW.map((p, i) => ({
+  ...p,
+  no: 'PF-' + String(i + 1).padStart(2, '0'),
+  ts: NOW - p.days * DAY
+}));
+const AVATAR_HUES = ['oklch(62% 0.11 35)', 'oklch(58% 0.09 160)', 'oklch(55% 0.08 250)'];
+const hueOf = name => AVATAR_HUES[(name.charCodeAt(0) + name.length) % AVATAR_HUES.length];
+const getAllTags = () => [...new Set(PROMPTS.flatMap(p => p.tags))];
+
+/* ================= State ================= */
+const state = {
+  q: '', sort: 'desc', tags: new Set(), expanded: new Set(),
+  liked: loadLiked()
+};
+function loadLiked() {
+  try { return new Set(JSON.parse(localStorage.getItem('pf-liked') || '[]')); }
+  catch (e) { return new Set(); }
+}
+function saveLiked() {
+  try { localStorage.setItem('pf-liked', JSON.stringify([...state.liked])); } catch (e) {}
+}
+/* 服务端模式下 likes 已含本人点赞，不再本地 +1；仅离线兜底模式做本地增量 */
+const likeCount = p => p.likes + (!SERVER_MODE && state.liked.has(p.id) ? 1 : 0);
+
+/* ================= 后端对接 & 关键节点日志 ================= */
+const API_BASE = 'https://api.agarena.xyz';
+let API_ON = false; // /api/prompts 拉取成功后才启用上报，离线预览不发送
+let VID = null; try { VID = localStorage.getItem('shufy_anon'); } catch (e) {}
+if (!VID) { VID = 'u-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); try { localStorage.setItem('shufy_anon', VID); } catch (e) {} }
+const SID = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2);
+
+/* 关键节点日志：批量队列 → /api/prompts/log（pf_logs 表） */
+const PF_LOGQ = [];
+function pfLog(type, promptId, meta) {
+  if (!API_ON) return;
+  PF_LOGQ.push({ type, promptId: promptId || '', meta: meta || null, ts: Date.now() });
+  if (PF_LOGQ.length >= 10) flushPfLog();
+}
+function flushPfLog() {
+  if (!API_ON || !PF_LOGQ.length) return;
+  const body = JSON.stringify({ vid: VID, sid: SID, events: PF_LOGQ.splice(0) });
+  try {
+    if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/prompts/log', new Blob([body], { type: 'application/json' }));
+    else fetch(API_BASE + '/api/prompts/log', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+setInterval(flushPfLog, 10000);
+addEventListener('pagehide', flushPfLog);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushPfLog(); });
+
+/* 页面访问与停留时长：复用主站 /api/collect → visits 表（后台图表可看该页流量/来源/地域） */
+const T0 = Date.now();
+let dwellSent = false;
+function collectSend(events) {
+  const q = new URLSearchParams(location.search);
+  const body = JSON.stringify({
+    anonId: VID, sessionId: SID,
+    context: {
+      path: location.pathname, referrer: document.referrer || null,
+      src: (q.get('from') || '').slice(0, 40) || null, v: (q.get('v') || '').slice(0, 40) || null,
+      landing: location.pathname + location.search
+    },
+    events
+  });
+  try {
+    if (navigator.sendBeacon) navigator.sendBeacon(API_BASE + '/api/collect', new Blob([body], { type: 'application/json' }));
+    else fetch(API_BASE + '/api/collect', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+  } catch (e) {}
+}
+function reportDwell() {
+  if (dwellSent || !API_ON) return;
+  dwellSent = true;
+  collectSend([{ type: 'dwell', path: location.pathname, ts: Date.now(), meta: { dwell: Date.now() - T0 } }]);
+  flushPfLog();
+}
+addEventListener('pagehide', reportDwell);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') reportDwell(); });
+
+/* ================= Helpers ================= */
+const $ = s => document.querySelector(s);
+const grid = $('#grid'), countEl = $('#count'), emptyEl = $('#empty');
+const searchInput = $('#searchInput'), searchBox = $('#searchBox');
+const fbDrawer = $('#fbDrawer'), subDrawer = $('#subDrawer'), backdrop = $('#backdrop');
+const toastEl = $('#toast'), toastText = $('#toastText');
+let toastTimer = null;
+
+function esc(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function escReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function hl(text) {
+  const safe = esc(text);
+  if (!state.q) return safe;
+  return safe.replace(new RegExp(escReg(state.q), 'gi'), m => '<mark>' + m + '</mark>');
+}
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return m + ' 分钟前';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + ' 小时前';
+  const d = Math.floor(h / 24);
+  if (d < 30) return d + ' 天前';
+  return new Date(ts).toLocaleDateString('zh-CN');
+}
+function fullDate(ts) {
+  return new Date(ts).toLocaleString('zh-CN', { dateStyle: 'long', timeStyle: 'short' });
+}
+function toast(msg, isError) {
+  toastText.textContent = msg;
+  toastEl.classList.toggle('error', !!isError);
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+}
+function fullText(p) {
+  let t = '《' + p.title + '》\n' + p.scene + '\n\n' + p.content;
+  if (p.example) t += '\n\n【使用示例】\n' + p.example;
+  return t;
+}
+
+function getFiltered() {
+  const q = state.q;
+  let list = PROMPTS.filter(p => {
+    if (state.tags.size && !p.tags.some(t => state.tags.has(t))) return false;
+    if (q) {
+      const hay = (p.title + ' ' + p.scene + ' ' + p.content + ' ' + p.tags.join(' ') + ' ' + p.author + ' ' + p.platform + ' ' + p.no).toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  list.sort((a, b) => {
+    if (state.sort === 'desc') return b.ts - a.ts;
+    if (state.sort === 'asc') return a.ts - b.ts;
+    return likeCount(b) - likeCount(a);
+  });
+  return list;
+}
+
+/* ================= Render ================= */
+function renderChips() {
+  const tagbar = $('#tagbar');
+  const tags = getAllTags();
+  const counts = {};
+  PROMPTS.forEach(p => p.tags.forEach(t => counts[t] = (counts[t] || 0) + 1));
+  const frag = document.createDocumentFragment();
+  tags.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'tagchip' + (state.tags.has(t) ? ' active' : '');
+    b.dataset.tag = t;
+    b.setAttribute('aria-pressed', state.tags.has(t));
+    b.innerHTML = hl(t) + '<span class="n">' + counts[t] + '</span>';
+    frag.appendChild(b);
+  });
+  tagbar.querySelectorAll('.tagchip').forEach(n => n.remove());
+  tagbar.insertBefore(frag, $('#resetFilters'));
+  $('#resetFilters').classList.toggle('show', state.tags.size > 0);
+}
+
+function platformHTML(p) {
+  if (!p.account) return '';
+  if (p.url) {
+    return '<a class="plat-link" href="' + esc(p.url) + '" target="_blank" rel="noopener" title="' + esc(p.author) + ' · 跳转到作者主页">' +
+      '<span class="acct">' + esc(p.account) + '</span><span class="goto">作者主页</span><span class="arr">→</span></a>';
+  }
+  return '<button type="button" class="plat-link" data-action="copyAccount" title="' + esc(p.author) + ' · 点击复制作者微信号">' +
+    '<span class="acct">' + esc(p.account) + '</span><span class="goto">作者主页</span><span class="arr">→</span></button>';
+}
+
+function cardHTML(p, i) {
+  const liked = state.liked.has(p.id);
+  const open = state.expanded.has(p.id);
+  return `
+  <article class="card" data-id="${esc(p.id)}" style="--i:${i}">
+    <div class="card-top">
+      <span class="no">${esc(p.no)}</span>
+      <time datetime="${new Date(p.ts).toISOString()}" title="更新于 ${fullDate(p.ts)}">${timeAgo(p.ts)}</time>
+    </div>
+    <h3 class="card-title">${hl(p.title)}</h3>
+    <div class="card-scene"><span class="scene-label">使用场景</span>${hl(p.scene)}</div>
+    ${p.img ? '<img class="card-img" src="' + esc(p.img) + '" alt="配图">' : ''}
+    <div class="card-tags">${p.tags.map(t => `<button class="tag" data-action="tag" data-tag="${esc(t)}">${hl(t)}</button>`).join('')}</div>
+    <p class="card-content ${open ? 'open' : ''}">${hl(p.content)}</p>
+    ${p.example ? '<div class="card-example ' + (open ? 'open' : '') + '"><span class="ex-label">使用示例</span>' + hl(p.example) + '</div>' : ''}
+    <button class="btn-expand" data-action="expand">${open ? '收起' : '展开全文'}</button>
+    <div class="card-foot">
+      <span class="author">
+        <span class="avatar" style="--av:${hueOf(p.author)}" title="${esc(p.author)}">${esc(p.author[0])}</span>
+        ${platformHTML(p)}
+      </span>
+      <div class="actions">
+        <button class="btn-copy" data-action="copy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <span>复制</span>
+        </button>
+        <button class="btn-like ${liked ? 'liked' : ''}" data-action="like" aria-pressed="${liked}" aria-label="点赞">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          <span class="cnt">${likeCount(p)}</span>
+        </button>
+        <button class="btn-card-fb" data-action="feedback">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>反馈</span>
+        </button>
+        <button class="btn-share" data-action="share" aria-label="分享这张卡片">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>
+          <span>分享</span>
+        </button>
+      </div>
+    </div>
+  </article>`;
+}
+
+function render() {
+  const list = getFiltered();
+  grid.innerHTML = list.map(cardHTML).join('');
+  countEl.innerHTML = list.length
+    ? '共 <strong>' + list.length + '</strong> 条' + (state.tags.size ? ' · 已选 ' + state.tags.size + ' 个标签' : '')
+    : '';
+  emptyEl.classList.toggle('show', list.length === 0);
+  $('#emptyQ').textContent = state.q ? '「' + state.q + '」' : '当前条件';
+  renderChips();
+  $('#statTotal').textContent = PROMPTS.length;
+  $('#statTags').textContent = getAllTags().length;
+  $('#statLikes').textContent = PROMPTS.reduce((s, p) => s + likeCount(p), 0).toLocaleString('zh-CN');
+}
+
+/* ================= Interactions ================= */
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;opacity:0;';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      return ok;
+    } catch (e2) { return false; }
+  }
+}
+
+grid.addEventListener('click', async e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const card = btn.closest('.card');
+  const p = PROMPTS.find(x => x.id === card.dataset.id);
+  const action = btn.dataset.action;
+
+  if (action === 'copy') {
+    const ok = await copyText(fullText(p));
+    if (ok) {
+      btn.classList.add('copied');
+      const span = btn.querySelector('span');
+      const old = span.textContent;
+      span.textContent = '已复制';
+      toast('完整提示词（含场景与示例）已复制');
+      setTimeout(() => { btn.classList.remove('copied'); span.textContent = old; }, 1800);
+      pfLog('copy', p.id);
+    } else {
+      toast('复制失败，请手动选择文本复制', true);
+    }
+  }
+
+  if (action === 'like') {
+    const nowLiked = !state.liked.has(p.id);
+    if (nowLiked) state.liked.add(p.id); else state.liked.delete(p.id);
+    saveLiked();
+    if (SERVER_MODE) {
+      // 乐观更新，服务端返回权威计数后校正（点赞事件由服务端记 pf_logs）
+      p.likes = Math.max(0, p.likes + (nowLiked ? 1 : -1));
+      render();
+      fetch(API_BASE + '/api/prompts/like', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: p.id, vid: VID, liked: nowLiked })
+      }).then(r => r.ok ? r.json() : null)
+        .then(j => { if (j && j.ok && typeof j.likes === 'number' && j.likes !== p.likes) { p.likes = j.likes; render(); } })
+        .catch(() => {});
+    } else {
+      render();
+    }
+  }
+
+  if (action === 'expand') {
+    const willOpen = !state.expanded.has(p.id);
+    if (willOpen) state.expanded.add(p.id); else state.expanded.delete(p.id);
+    card.querySelector('.card-content').classList.toggle('open', willOpen);
+    const ex = card.querySelector('.card-example');
+    if (ex) ex.classList.toggle('open', willOpen);
+    btn.textContent = willOpen ? '收起' : '展开全文';
+    pfLog('expand', p.id, { open: willOpen });
+  }
+
+  if (action === 'feedback') openDrawer(fbDrawer, () => { fbPromptSel.value = p.id; });
+
+  if (action === 'tag') {
+    const t = btn.dataset.tag;
+    if (state.tags.has(t)) state.tags.delete(t); else state.tags.add(t);
+    render();
+  }
+
+  if (action === 'copyAccount') {
+    const acc = p.account.replace(/^@/, '');
+    const ok = await copyText(acc);
+    if (ok) { toast('已复制作者微信号到剪贴板：' + acc); pfLog('copy_account', p.id); }
+    else toast('复制失败，请手动复制', true);
+  }
+
+  if (action === 'share') {
+    const shareUrl = location.origin + location.pathname + '?id=' + encodeURIComponent(p.id);
+    if (navigator.share) {
+      navigator.share({ title: '《' + p.title + '》— 提示词卡片', text: p.scene, url: shareUrl })
+        .then(() => pfLog('share', p.id, { via: 'share' }))
+        .catch(() => {});
+    } else {
+      const ok = await copyText(shareUrl);
+      if (ok) { toast('分享链接已复制，发给朋友即可直达这张卡片'); pfLog('share', p.id, { via: 'copy' }); }
+      else toast('复制失败，请手动复制', true);
+    }
+  }
+});
+
+$('#tagbar').addEventListener('click', e => {
+  const chip = e.target.closest('.tagchip');
+  if (!chip) return;
+  const t = chip.dataset.tag;
+  if (state.tags.has(t)) state.tags.delete(t); else state.tags.add(t);
+  render();
+});
+$('#resetFilters').addEventListener('click', () => { state.tags.clear(); render(); });
+
+let debounce = null;
+let lastLoggedQ = '';
+searchInput.addEventListener('input', () => {
+  searchBox.classList.toggle('has-q', !!searchInput.value);
+  clearTimeout(debounce);
+  debounce = setTimeout(() => {
+    state.q = searchInput.value.trim().toLowerCase();
+    render();
+    if (state.q && state.q !== lastLoggedQ) {
+      lastLoggedQ = state.q;
+      pfLog('search', '', { q: state.q.slice(0, 60) });
+    }
+  }, 160);
+});
+$('#clearQ').addEventListener('click', () => {
+  searchInput.value = '';
+  searchBox.classList.remove('has-q');
+  state.q = '';
+  render();
+  searchInput.focus();
+});
+
+document.querySelectorAll('.sortseg button').forEach(b => {
+  b.addEventListener('click', () => {
+    state.sort = b.dataset.sort;
+    document.querySelectorAll('.sortseg button').forEach(x =>
+      x.setAttribute('aria-pressed', x === b));
+    render();
+  });
+});
+
+$('#emptyReset').addEventListener('click', () => {
+  state.q = ''; state.tags.clear();
+  searchInput.value = '';
+  searchBox.classList.remove('has-q');
+  render();
+});
+
+/* ================= Drawer plumbing ================= */
+function openDrawer(drawer, afterOpen) {
+  closeDrawers();
+  drawer.classList.add('open');
+  backdrop.classList.add('show');
+  document.body.style.overflow = 'hidden';
+  if (afterOpen) afterOpen();
+}
+function closeDrawers() {
+  fbDrawer.classList.remove('open');
+  subDrawer.classList.remove('open');
+  backdrop.classList.remove('show');
+  document.body.style.overflow = '';
+}
+backdrop.addEventListener('click', closeDrawers);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && (fbDrawer.classList.contains('open') || subDrawer.classList.contains('open'))) closeDrawers();
+});
+$('#fbDrawerClose').addEventListener('click', closeDrawers);
+$('#subDrawerClose').addEventListener('click', closeDrawers);
+$('#topFeedback').addEventListener('click', () => openDrawer(fbDrawer, () => fbText.focus()));
+$('#heroFeedback').addEventListener('click', () => openDrawer(fbDrawer, () => fbText.focus()));
+$('#topSubmit').addEventListener('click', () => openDrawer(subDrawer, () => subTitle.focus()));
+$('#heroSubmit').addEventListener('click', () => openDrawer(subDrawer, () => subTitle.focus()));
+
+/* ================= Feedback form ================= */
+const fbPromptSel = $('#fbPrompt'), fbText = $('#fbText'), fbErr = $('#fbErr'), fbCount = $('#fbCount');
+let fbType = '评价';
+
+fbPromptSel.innerHTML = '<option value="">不关联具体提示词（对网站的整体反馈）</option>' +
+  PROMPTS.map(p => `<option value="${p.id}">${p.no} · ${esc(p.title)}</option>`).join('');
+
+document.querySelectorAll('.fbtype').forEach(b => {
+  b.addEventListener('click', () => {
+    fbType = b.dataset.fbtype;
+    document.querySelectorAll('.fbtype').forEach(x => x.setAttribute('aria-pressed', x === b));
+  });
+});
+fbText.addEventListener('input', () => {
+  if (fbText.value.length > 500) fbText.value = fbText.value.slice(0, 500);
+  fbCount.textContent = fbText.value.length + ' / 500';
+  fbErr.textContent = '';
+});
+$('#fbSubmit').addEventListener('click', async () => {
+  const text = fbText.value.trim();
+  if (!text) {
+    fbErr.textContent = '请填写一些内容再提交';
+    fbText.focus();
+    return;
+  }
+  const btn = $('#fbSubmit');
+  btn.disabled = true;
+  try {
+    const r = await fetch(API_BASE + '/api/prompts/feedback', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ kind: fbType, promptId: fbPromptSel.value || '', text, hp: $('#fbHp').value, vid: VID })
+    });
+    const j = await r.json().catch(() => null);
+    if (!j || !j.ok) throw new Error((j && j.msg) || r.status);
+    const related = fbPromptSel.value ? PROMPTS.find(p => p.id === fbPromptSel.value) : null;
+    closeDrawers();
+    toast('感谢你的「' + fbType + '」反馈' + (related ? '（' + related.title + '）' : '') + '，我们会认真阅读');
+    fbText.value = ''; fbCount.textContent = '0 / 500';
+    fbPromptSel.value = '';
+    fbType = '评价';
+    document.querySelectorAll('.fbtype').forEach(x => x.setAttribute('aria-pressed', x.dataset.fbtype === '评价'));
+  } catch (e) {
+    fbErr.textContent = '提交失败，请检查网络后重试（内容已保留）';
+    toast('反馈提交失败，请稍后重试', true);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ================= Submit prompt form ================= */
+const subTitle = $('#subTitle'), subScene = $('#subScene'), subContent = $('#subContent'),
+      subExample = $('#subExample'), subPlatform = $('#subPlatform'), subAccount = $('#subAccount'),
+      subUrl = $('#subUrl');
+const uploadBox = $('#uploadBox'), subImg = $('#subImg'),
+      uploadPreview = $('#uploadPreview'), uploadImg = $('#uploadImg');
+let subImgData = null;
+
+[['#fTitle', subTitle], ['#fScene', subScene], ['#fContent', subContent], ['#fExample', subExample], ['#fAccount', subAccount], ['#fUrl', subUrl]]
+.forEach(([fid, el]) => {
+  const max = el.maxLength;
+  const cnt = document.querySelector(fid + ' .cnt');
+  const field = $(fid);
+  el.addEventListener('input', () => {
+    cnt.textContent = el.value.length + ' / ' + max;
+    field.classList.remove('invalid');
+    field.querySelector('.err').textContent = '';
+  });
+});
+
+subPlatform.addEventListener('change', () => {
+  const none = !subPlatform.value;
+  subAccount.disabled = none;
+  subAccount.placeholder = none ? '先选择引流平台' : '你的' + subPlatform.value + '账号名，如 @提示词收藏夹';
+  if (none) { subAccount.value = ''; document.querySelector('#fAccount .cnt').textContent = '0 / 30'; }
+});
+
+uploadBox.addEventListener('dragover', e => { e.preventDefault(); uploadBox.classList.add('dragover'); });
+uploadBox.addEventListener('dragleave', () => uploadBox.classList.remove('dragover'));
+uploadBox.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadBox.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) readImg(e.dataTransfer.files[0]);
+});
+subImg.addEventListener('change', () => { if (subImg.files[0]) readImg(subImg.files[0]); });
+function readImg(file) {
+  if (!file.type.startsWith('image/')) { toast('请选择图片文件', true); return; }
+  if (file.size > 5 * 1024 * 1024) { toast('图片超过 5MB，请换一张', true); return; }
+  const r = new FileReader();
+  r.onload = () => {
+    subImgData = r.result;
+    uploadImg.src = subImgData;
+    uploadPreview.classList.add('show');
+    uploadBox.style.display = 'none';
+  };
+  r.readAsDataURL(file);
+}
+$('#rmImg').addEventListener('click', () => {
+  subImgData = null;
+  subImg.value = '';
+  uploadPreview.classList.remove('show');
+  uploadBox.style.display = '';
+});
+
+function setErr(fid, msg) {
+  const field = $(fid);
+  field.classList.add('invalid');
+  field.querySelector('.err').textContent = msg;
+}
+/* 配图压缩：最长边 ≤800px、JPEG 0.72，目标 ≤200KB（与服务端限制一致） */
+function compressImg(dataUrl, maxEdge, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+        const cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(img.width * scale));
+        cv.height = Math.max(1, Math.round(img.height * scale));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        resolve(cv.toDataURL('image/jpeg', quality));
+      } catch (e) { resolve(null); }
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+
+$('#subSubmit').addEventListener('click', async () => {
+  const title = subTitle.value.trim();
+  const sceneCore = subScene.value.trim();
+  const content = subContent.value.trim();
+  const url = subUrl.value.trim();
+  let bad = false;
+  if (!title) { setErr('#fTitle', '请填写标题'); bad = true; }
+  if (!sceneCore) { setErr('#fScene', '请描述使用场景'); bad = true; }
+  if (!content) { setErr('#fContent', '请填写提示词内容'); bad = true; }
+  if (url && !/^https?:\/\/.+\..+/i.test(url)) { setErr('#fUrl', '链接需以 http:// 或 https:// 开头'); bad = true; }
+  if (bad) {
+    const firstBad = document.querySelector('.field.invalid input, .field.invalid textarea');
+    if (firstBad) firstBad.focus();
+    return;
+  }
+  const btn = $('#subSubmit');
+  btn.disabled = true;
+  try {
+    let img = subImgData;
+    if (img) {
+      const compressed = await compressImg(img, 800, 0.72);
+      if (compressed && compressed.length <= 200 * 1024) img = compressed;
+      else { img = ''; toast('配图过大未能压缩，本次投稿不含图片'); }
+    }
+    const r = await fetch(API_BASE + '/api/prompts/submit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        scene: '当' + sceneCore + '时，请使用本提示词。',
+        content,
+        example: subExample.value.trim(),
+        platform: subPlatform.value,
+        account: subAccount.value.trim(),
+        url,
+        img,
+        hp: $('#subHp').value,
+        vid: VID
+      })
+    });
+    const j = await r.json().catch(() => null);
+    if (!j || !j.ok) throw new Error((j && j.msg) || r.status);
+    state.sort = 'desc';
+    document.querySelectorAll('.sortseg button').forEach(x =>
+      x.setAttribute('aria-pressed', x.dataset.sort === 'desc'));
+    closeDrawers();
+    toast('已收到投稿，审核通过后会出现在卡片盒，感谢分享');
+    subTitle.value = ''; subScene.value = ''; subContent.value = ''; subExample.value = '';
+    subPlatform.value = ''; subAccount.value = ''; subAccount.disabled = true; subAccount.placeholder = '先选择引流平台';
+    subUrl.value = '';
+    document.querySelectorAll('.field .cnt').forEach(c => c.textContent = '0 / ' + c.textContent.split('/')[1].trim());
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('invalid'));
+    document.querySelectorAll('.field .err').forEach(e2 => e2.textContent = '');
+    subImgData = null; subImg.value = '';
+    uploadPreview.classList.remove('show');
+    uploadBox.style.display = '';
+  } catch (e) {
+    toast('投稿提交失败，请检查网络后重试（内容已保留）', true);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+/* ================= 个人信息署名 ================= */
+/* 正式来源是 D1 site 表（/api/site 运行时覆盖，换品牌/邮箱改库即生效），下方为兜底常量 */
+const SITE_INFO = { brand_name: '不吃鲸B', platforms: '抖音 / B站 / 微信公众号', contact_email: 'agarena@agent.qq.com' };
+function renderCredit(brandName) {
+  $('#brandCredit').textContent = '© ' + new Date().getFullYear() + ' ' + brandName + ' · ' + SITE_INFO.platforms + '同名';
+}
+renderCredit(SITE_INFO.brand_name);
+try {
+  fetch('https://api.agarena.xyz/api/site')
+    .then(r => r.ok ? r.json() : null)
+    .then(s => { if (s && s.brand_name) renderCredit(s.brand_name); })
+    .catch(() => {});
+} catch (e) {}
+
+/* ================= Init ================= */
+render(); // 先用内置数据立刻出画面，接口返回后再替换
+
+/* 分享深链：?id=卡片id → 清筛选、展开、滚动定位并高亮；不存在则提示 */
+const DEEP_ID = (() => { try { return (new URLSearchParams(location.search).get('id') || '').slice(0, 60); } catch (e) { return ''; } })();
+function handleDeepLink() {
+  if (!DEEP_ID) return;
+  const p = PROMPTS.find(x => x.id === DEEP_ID);
+  if (!p) {
+    toast('该提示词不存在或未公开', true);
+    pfLog('share_open', DEEP_ID, { found: false });
+    return;
+  }
+  state.q = ''; state.tags.clear();
+  searchInput.value = ''; searchBox.classList.remove('has-q');
+  state.expanded.add(p.id);
+  render();
+  requestAnimationFrame(() => {
+    const sel = '.card[data-id="' + (window.CSS && CSS.escape ? CSS.escape(DEEP_ID) : DEEP_ID) + '"]';
+    const el = grid.querySelector(sel);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 2600);
+    }
+  });
+  pfLog('share_open', DEEP_ID, { found: true });
+}
+
+(async () => {
+  try {
+    const list = await fetch(API_BASE + '/api/prompts').then(r => r.ok ? r.json() : Promise.reject(r.status));
+    if (Array.isArray(list) && list.length) {
+      SERVER_MODE = true;
+      API_ON = true;
+      PROMPTS = list;
+      render();
+    }
+  } catch (e) { /* 离线/预览：保留内置兜底数据，不上报 */ }
+  if (API_ON) {
+    collectSend([{ type: 'page_view', path: location.pathname, ts: Date.now() }]);
+    pfLog('page_view', '', { ref: document.referrer || null });
+  }
+  handleDeepLink();
+})();
+</script>
+</body>
+</html>
