@@ -1363,8 +1363,10 @@ function doLike(p) {
 }
 async function shareById(p) {
   const shareUrl = location.origin + location.pathname + '?id=' + encodeURIComponent(p.id);
-  const ok = await copyText(shareUrl);
-  if (ok) { toast('分享链接已复制，发给朋友即可直达这张卡片'); pfLog('share', p.id, { via: 'copy' }); }
+  // B 站式分享模板：【内容标题】说明 链接，粘贴出去自带说明
+  const text = '【' + p.title + '】不吃鲸B · 提示词卡片盒，展开即可复制 ' + shareUrl;
+  const ok = await copyText(text);
+  if (ok) { toast('分享文案已复制，粘贴给朋友即可'); pfLog('share', p.id, { via: 'copy' }); }
   else toast('复制失败，请手动复制', true);
 }
 
