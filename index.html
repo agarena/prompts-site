@@ -1100,14 +1100,15 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 /* 页面访问与停留时长：复用主站 /api/collect → visits 表（后台图表可看该页流量/来源/地域） */
 const T0 = Date.now();
 let dwellSent = false;
+const SITE_PATH = '/prompts/'; // 独立域名下 pathname 是 /，用固定路径让后台访问路径能区分各站
 function collectSend(events) {
   const q = new URLSearchParams(location.search);
   const body = JSON.stringify({
     anonId: VID, sessionId: SID,
     context: {
-      path: location.pathname, referrer: document.referrer || null,
+      path: SITE_PATH, referrer: document.referrer || null,
       src: (q.get('from') || '').slice(0, 40) || null, v: (q.get('v') || '').slice(0, 40) || null,
-      landing: location.pathname + location.search
+      landing: location.host + location.pathname + location.search
     },
     events
   });
@@ -1122,7 +1123,7 @@ function collectSend(events) {
 function reportDwell() {
   if (dwellSent || !API_ON) return;
   dwellSent = true;
-  collectSend([{ type: 'dwell', path: location.pathname, ts: Date.now(), meta: { dwell: Date.now() - T0 } }]);
+  collectSend([{ type: 'dwell', path: SITE_PATH, ts: Date.now(), meta: { dwell: Date.now() - T0 } }]);
   flushPfLog();
 }
 addEventListener('pagehide', reportDwell);
@@ -1781,7 +1782,7 @@ function handleDeepLink() {
     }
   } catch (e) { /* 离线/预览：保留内置兜底数据，不上报 */ }
   if (API_ON) {
-    collectSend([{ type: 'page_view', path: location.pathname, ts: Date.now() }]);
+    collectSend([{ type: 'page_view', path: SITE_PATH, ts: Date.now() }]);
     pfLog('page_view', '', { ref: document.referrer || null });
   }
   handleDeepLink();
