@@ -1,6 +1,6 @@
 # 优质提示词聚合网站（Prompt Folio）
 
-「不吃鲸B」出品的提示词卡片盒：每张卡片写清使用场景、提示词正文与使用示例，看到合适的展开即可整体复制。支持搜索、标签筛选、三种排序、点赞、分享深链、投稿与反馈。
+「不吃鲸B」出品的提示词卡片盒：每张卡片写清使用场景、提示词正文与使用示例，看到合适的展开即可整体复制。支持搜索、标签筛选、三种排序、点赞、分享深链、投稿与反馈。使用示例中的 http(s) 链接会自动渲染为可点击外链（仅放行 http/https，其余 HTML 一律转义）。
 
 - 线上地址：<https://prompts.agarena.xyz>
 - 品牌与引流入口见页面底部署名（运行时由后端 `/api/site` 下发）
@@ -22,7 +22,7 @@ Cloudflare D1（表：prompts / prompt_likes / prompt_feedback / pf_logs + 主�
 ```
 
 - 前端零构建：单文件 `index.html`，直接部署到 Cloudflare Pages 项目 `prompts-site`。
-- 接口不可达时自动降级为内置的 12 条兜底数据（与 `analytics-worker/seed.sql` 保持同步，**改一处必须同步另一处**）。
+- 接口不可达时自动降级为内置的 15 条兜底数据（与 `analytics-worker/seed.sql` 保持同步，**改一处必须同步另一处**）。
 
 ## 功能与关键节点日志
 

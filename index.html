@@ -352,6 +352,11 @@ a { color: inherit; }
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
   color: var(--ink-3); margin-bottom: 6px; text-transform: uppercase;
 }
+.card-example a {
+  color: var(--accent-deep); font-weight: 550;
+  text-decoration: underline; text-underline-offset: 3px; word-break: break-all;
+}
+.card-example a:hover { color: var(--accent); }
 .card-content mark, .card-title mark, .card-scene mark, .card-example mark, .tagchip mark {
   background: var(--accent-soft); color: var(--accent-deep);
   border-radius: 3px; padding: 0 2px;
@@ -1042,6 +1047,13 @@ const RAW = [
     scene: '当你做完一个网站、想让支持电脑控制插件的 AI 像第一次到访的用户一样实测核心流程并产出体验报告时，请使用本提示词。',
     content: "帮我设置一个闲时任务，使用 [@电脑控制]打开 [目标网站]，像第一次来的用户一样实际操作。请选出这个网站最核心的一条公开用户旅程，从首页走到完成任务前的最后一步，记录每一步的页面、困惑点和无法继续的地方，并附关键截图。最后给我一份详细的用户体验报告，按影响程度列出问题、依据和具体改进建议。不要注册、付款或提交真实信息；遇到登录限制就说明未覆盖的步骤。如果还没有选择本地项目，先让我选择一个用于保存报告。",
   },
+  {
+    id: 'pf15', title: '鹈鹕骑自行车 3D 场景生成（Three.js 极限测试）', author: '不吃鲸B', platform: '网络', account: '@不吃鲸B', url: 'https://space.bilibili.com/3706967832922946', days: 0, likes: 0,
+    tags: ['编程', '测试'],
+    scene: '当你想检验编程 AI 的 3D 前端生成能力上限，或想要一个精致可交互的 Three.js 演示页时，请使用本提示词。',
+    content: '新建一个文件夹，命名为"测试用例-标准-step5",你禁止访问本路径以外的内容，然后尽你最大努力，不考虑成本，完成以下任务：使用 Three.js 创建一个精致、可交互的 3D 网页场景：一只鹈鹕正在骑自行车。\n鹈鹕、自行车、环境、动画、灯光、摄像机和交互均通过程序实现。鹈鹕需要真实地骑自行车，并具有协调的腿部、脚踏、车轮和身体运动。\n不要使用 SVG、2D Canvas、外部 3D 模型或预渲染动画。\n最终输出一个可以直接在现代浏览器中运行的完整 HTML 文件。',
+    example: '输入：把本提示词原文投给可执行工程任务的编程 AI。\n输出：一个完整单文件 HTML——现代浏览器直接打开，就是鹈鹕蹬自行车前进的可交互 3D 场景：腿部、脚踏、车轮与身体协调联动，灯光、镜头与交互全部程序生成，无任何外部模型与预渲染动画。\n6 版生成结果实测横评（同一道题 · 不同模式与模型，含成本耗时对比）：https://agarena.github.io/pelican-benchmark/'
+  },
 ];
 let SERVER_MODE = false; // /api/prompts 拉取成功后置 true：点赞计数以服务端为准
 let PROMPTS = RAW.map((p, i) => ({
@@ -1148,6 +1160,11 @@ function hl(text) {
   if (!state.q) return safe;
   return safe.replace(new RegExp(escReg(state.q), 'gi'), m => '<mark>' + m + '</mark>');
 }
+/* 输入必须是 esc() 之后的文本：只把 http(s) 裸链接转为可点击外链，其余 HTML 仍不可注入 */
+function linkify(safeHtml) {
+  return safeHtml.replace(/https?:\/\/[^\s<>"'，。；！？：、（）【】]+/g,
+    u => '<a href="' + u + '" target="_blank" rel="noopener nofollow">' + u + '</a>');
+}
 function timeAgo(ts) {
   const diff = Date.now() - ts;
   const m = Math.floor(diff / 60000);
@@ -1236,7 +1253,7 @@ function cardHTML(p, i) {
     ${p.img ? '<img class="card-img" src="' + esc(p.img) + '" alt="配图">' : ''}
     <div class="card-tags">${p.tags.map(t => `<button class="tag" data-action="tag" data-tag="${esc(t)}">${hl(t)}</button>`).join('')}</div>
     <p class="card-content">${hl(p.content)}</p>
-    ${p.example ? '<div class="card-example"><span class="ex-label">使用示例</span>' + hl(p.example) + '</div>' : ''}
+    ${p.example ? '<div class="card-example"><span class="ex-label">使用示例</span>' + linkify(hl(p.example)) + '</div>' : ''}
     <button class="btn-expand" data-action="expand">查看全文</button>
     <div class="card-foot">
       <span class="author">
@@ -1423,7 +1440,7 @@ function openPromptModal(p) {
   $('#pfmScene').textContent = p.scene;
   $('#pfmContent').textContent = p.content;
   const exWrap = $('#pfmExampleWrap');
-  if (p.example) { exWrap.style.display = ''; $('#pfmExample').textContent = p.example; }
+  if (p.example) { exWrap.style.display = ''; $('#pfmExample').innerHTML = linkify(esc(p.example)); }
   else exWrap.style.display = 'none';
   $('#pfmLike').classList.toggle('liked', state.liked.has(p.id));
   $('#pfmLike .cnt').textContent = likeCount(p);
